@@ -1,2 +1,3 @@
-ga
-==
+Geometric Algebra Library
+=========================
+
