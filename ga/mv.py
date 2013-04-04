@@ -12,7 +12,7 @@ specialized: ex. rotor, vector -- doesnot store all of the coefficients
 def mv: 
 	mv is multivector repr whith supports following operations:
 		inz, itr, get
-	 
+
 	 
 
 """
@@ -29,7 +29,7 @@ def inz(mv):
 			yield i,f
 
 def itr(mv):
-	""" Iterate over all index,coeff pairs """
+	""" Iterate over all coeffs """
 	return iter(mv)
 
 def get(mv, i):
@@ -37,8 +37,15 @@ def get(mv, i):
 	return mv[i]
 		
 	
-
-
+def itp(ga, mv, l, grade_slices):
+	""" Iterate over l-th grade part """
+	if not (0 <= l <= ga.n):
+		return
+	else:
+		i,j = grade_slices[l]
+		for k in range(i,j):
+			yield get(mv, k)
+		
 
 
 def mv_format(ga, bst, mv):
@@ -152,6 +159,11 @@ def take_grade(ga, grade_slices, mv, l):
 		i,j = grade_slices[l]
 		
 		return [(f if (i<=k<j) else 0.0) for (k,f) in enumerate(itr(mv))]
+
+
+
+
+
 
 def _comb(n,k):
 	return _factorial(n) / (_factorial(n-k) * _factorial(k))

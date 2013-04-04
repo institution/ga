@@ -4,8 +4,6 @@ demo: http://www.youtube.com/watch?v=yLoILAHW6xE
 
 usage:
 
-::
-
 	# install
 	python setup.py develop
 	

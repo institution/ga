@@ -222,6 +222,29 @@ def test_part():
 	doctest(x.part(2), '5.0e12+6.0e13+7.0e23')
 	doctest(x.part(3), '8.0I')
 	doctest(x.part(4), '0.0')
+	
+	
+
+
+def test_itp():
+	ga = GA(3)
+
+	x = ga.MV([1., 2.,3.,4., 5.,6.,7., 8.])
+
+	assert tuple(x.itp(-1)) == ()
+	assert tuple(x.itp(0)) == (1.0,)
+	assert tuple(x.itp(1)) == (2.0, 3.0, 4.0)
+	
+
+def test_repr():
+	ga = GA(2)
+	
+	x = ga.MV([1., 2.,3., 4.])
+	assert repr(x) == 'MV([1.0, 2.0, 3.0, 4.0])'
+
+
+	
+	
 
 	
 

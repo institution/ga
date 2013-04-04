@@ -31,7 +31,7 @@ ga.project
 import bb
 import mv
 import operator
-from math import sin, cos
+from math import sin, cos, sqrt
 
 epsilon = 0.00000001
 
@@ -68,22 +68,33 @@ class GA(object):
 	def _construct_MV(self):
 		ga = self
 		class MV(object):
-			""" Wrapper over other representation
-			"""
+			""" Wrapper over other representation """
+			
 			def __init__(self, r):
 				self._mv = mv.mv(ga, r)
 			
 			def get(self, i):
+				""" Get i-th element from internal representation """
 				return self._mv[i]
-
+			
+			def itp(self, l=1):
+				""" Iterate over l-th grade part """
+				return mv.itp(ga, self._mv, l, ga._grade_slices)
+									
 			def __iter__(self):
 				return iter(self._mv)
 
 			def __str__(self):
+				""" Human-friendly string representation """
 				return mv.mv_format(ga, ga._bst, self._mv)	
 
-
+			def __repr__(self):
+				""" Eval-able string representation """
+				return '{0}({1})'.format(self.__class__.__name__, repr(self._mv))
+			
+			
 			def __mul__(self, other):
+				""" Multiplication (binary *)"""
 				if isinstance(other, float):
 					return MV(mv.mulmf(ga, self._mv, other))
 				else: 
@@ -92,12 +103,15 @@ class GA(object):
 			def __rmul__(self, other):
 				assert isinstance(other, float)
 				return MV(mv.mulfm(ga, other, self._mv))
-
+			
+			
 			def __lshift__(self, other):
+				""" Left contraction (binary <<) """
 				return MV(mv.mulmm(ga, self._mv, other._mv, ga._bmt_left))
 
 			
 			def __add__(self, other):
+				""" Addition (binary +) """
 				if isinstance(other, float):					
 					return MV(mv.addmf(ga, self._mv, other, operator.iadd))
 				else: 
@@ -109,6 +123,7 @@ class GA(object):
 
 			
 			def __sub__(self, other):
+				""" Substraction (binary -) """
 				if isinstance(other, float):					
 					return MV(mv.addmf(ga, self._mv, other, operator.isub))
 				else: 
@@ -120,20 +135,22 @@ class GA(object):
 			
 
 			def __div__(self, other):
+				""" Division (binary /) """
 				if isinstance(other, (float, int)):
 					return MV(mv.divmf(ga, self._mv, other))
 				else: 
 					return MV(mv.mulmm(ga, self._mv, other.inv()._mv, ga._bmt_geo))
 
-				
-
 			def __or__(self, other):
+				""" Inner product (binary |) """
 				return MV(mv.mulmm(ga, self._mv, other._mv, ga._bmt_inn))
 
 			def __xor__(self, other):
+				""" Outer product (binary ^) """
 				return MV(mv.mulmm(ga, self._mv, other._mv, ga._bmt_out))
 
 			def __eq__(self, other):
+				""" Equality (binary ==) """
 				if isinstance(other, float):
 					return mv.eqmf(ga, self._mv, other)
 				return mv.eq(ga, self._mv, other._mv)
@@ -143,30 +160,43 @@ class GA(object):
 				return mv.eqfm(ga, other, self._mv)
 				
 			def rev(self):
-				""" Reverse
+				""" Return reversed MV
 				"""
 				return MV(mv.reverse(ga, self._mv))
 
 			def __invert__(self):
-				""" Reverse
+				""" Reverse (unary ~)
 				"""
 				return MV(mv.reverse(ga, self._mv))
 			
 			def __neg__(self):
+				""" Multiplication by -1.0 (unary -) """
 				return -1.0 * self		
 
 			def __pos__(self):
-				return self
+				""" Multiplication by +1.0 (unary +) """
+				return +1.0 * self
 
 			def norm_r2(self):
+				""" Return squared norm """
 				return float(self * ~self)
-
+			
+			def norm(self):
+				""" Return norm """
+				return sqrt(float(self * ~self))
+			
+			def normalized(self):
+				""" Return normalized MV """
+				return self / self.norm()
+			
 			def __float__(self):
+				""" Return 0-th grade coefficient (when rest is 0)
+				"""
 				assert all((f <= epsilon) for f in self._mv[1:])
 				return self.get(0)
 
 			def inv(self):
-				""" Inverse
+				""" Return inversed MV
 				inv(mv) = rev(mv) / mul(mv,mv.rev())
 				"""
 				X = self
@@ -174,6 +204,7 @@ class GA(object):
 				return MV(mv.div_scalar(X.rev(), f))
 
 			def part(self, l):
+				""" Return MV containing only l-th grade part """
 				return MV(mv.take_grade(ga, ga._grade_slices, self._mv, l))
 
 		return MV
@@ -217,7 +248,7 @@ class GA(object):
 		return -x
 
 	def pos(self, x):
-		return x
+		return +x
 
 	def inv(self, x):
 		return x.inv()
